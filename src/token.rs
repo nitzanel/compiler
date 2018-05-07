@@ -11,18 +11,18 @@ use std::str::Chars;
 #[derive(PartialEq, Debug)]
 pub enum Token {
     // EOF
-    TokEOF,
+    EOF,
 
     // Commands
-    TokDef,
-    TokExtern,
+    Def,
+    Extern,
 
     // Primary
-    TokIdentity,
-    TokNumber,
+    Identity,
+    Number(f64),
 
     // Unknown
-    TokUnkown,
+    Unknown(char),
 }
 
 pub struct Lexer<'a> {
@@ -37,9 +37,17 @@ impl<'a> Lexer<'a> {
     }
 
     fn get_identifier_string(&mut self, last_char: char) -> String {
-        let mut iden = String::from_iter(self.input.take_while_ref(|c| c.is_alphanumeric()));
-        iden.insert(0, last_char);
+        let mut iden = String::new();
+        iden.push(last_char);
+        iden.extend(self.input.take_while_ref(|c| c.is_alphanumeric()));
         iden
+    }
+
+    fn get_number(&mut self, last_char: char) -> f64 {
+        let mut concat_string = String::new();
+        concat_string.push(last_char);
+        concat_string.extend(self.input.take_while_ref(|c| c.is_digit(10) || *c == '.'));
+        concat_string.parse::<f64>().unwrap()
     }
 
     pub fn get_token(&mut self) -> Token {
@@ -49,21 +57,24 @@ impl<'a> Lexer<'a> {
 
         let last_char = match self.input.next() {
             Some(c) => c,
-            None => return Token::TokEOF,
+            None => return Token::EOF,
         };
 
-        let mut ident_string = String::new();
         if last_char.is_alphabetic() {
+            let mut ident_string = self.get_identifier_string(last_char);
             // Alphabetic of [a-zA-Z][a-zA-Z0-9]*
-            ident_string = self.get_identifier_string(last_char);
-        }
 
-        if ident_string == DEF_STRING {
-            Token::TokDef
-        } else if ident_string == EXTERN_STRING {
-            Token::TokExtern
+            if ident_string == DEF_STRING {
+                Token::Def
+            } else if ident_string == EXTERN_STRING {
+                Token::Extern
+            } else {
+                Token::Identity
+            }
+        } else if last_char.is_digit(10) || last_char == '.' {
+            Token::Number(self.get_number(last_char))
         } else {
-            Token::TokIdentity
+            Token::Unknown(last_char)
         }
     }
 }
