@@ -1,5 +1,5 @@
-mod token;
-use token::{Lexer, Token};
+mod compiler;
+use compiler::{Lexer, Token};
 
 fn main() {
     let mut lex = Lexer::new(" def hello");
