@@ -4,7 +4,7 @@ use token::{Lexer, Token};
 fn main() {
     let mut lex = Lexer::new(" def hello");
     assert_eq!(lex.get_token(), Token::Def);
-    assert_eq!(lex.get_token(), Token::Identity);
+    assert_eq!(lex.get_token(), Token::Identity("hello".to_string()));
     assert_eq!(lex.get_token(), Token::EOF);
 
     lex = Lexer::new("2 34. 51.23 .1");
@@ -16,4 +16,12 @@ fn main() {
 
     lex = Lexer::new("?");
     assert_eq!(lex.get_token(), Token::Unknown('?'));
+
+    lex = Lexer::new("#this is a comment\n 3.1");
+    assert_eq!(
+        lex.get_token(),
+        Token::Comment("this is a comment".to_string())
+    );
+    assert_eq!(lex.get_token(), Token::Number(3.1));
+    assert_eq!(lex.get_token(), Token::EOF);
 }

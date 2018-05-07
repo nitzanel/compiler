@@ -4,8 +4,7 @@ extern crate itertools;
 static DEF_STRING: &str = "def";
 static EXTERN_STRING: &str = "extern";
 
-use self::itertools::{Itertools, PeekingNext};
-use std::iter::FromIterator;
+use self::itertools::Itertools;
 use std::str::Chars;
 
 #[derive(PartialEq, Debug)]
@@ -18,11 +17,13 @@ pub enum Token {
     Extern,
 
     // Primary
-    Identity,
+    Identity(String),
     Number(f64),
 
     // Unknown
     Unknown(char),
+
+    Comment(String),
 }
 
 pub struct Lexer<'a> {
@@ -50,6 +51,13 @@ impl<'a> Lexer<'a> {
         concat_string.parse::<f64>().unwrap()
     }
 
+    fn skip_line(&mut self) -> String {
+        self.input
+            .by_ref()
+            .take_while(|c| *c != '\n' && *c != '\r')
+            .collect::<String>()
+    }
+
     pub fn get_token(&mut self) -> Token {
         self.input
             .take_while_ref(|c| c.is_whitespace())
@@ -61,7 +69,7 @@ impl<'a> Lexer<'a> {
         };
 
         if last_char.is_alphabetic() {
-            let mut ident_string = self.get_identifier_string(last_char);
+            let ident_string = self.get_identifier_string(last_char);
             // Alphabetic of [a-zA-Z][a-zA-Z0-9]*
 
             if ident_string == DEF_STRING {
@@ -69,10 +77,12 @@ impl<'a> Lexer<'a> {
             } else if ident_string == EXTERN_STRING {
                 Token::Extern
             } else {
-                Token::Identity
+                Token::Identity(ident_string)
             }
         } else if last_char.is_digit(10) || last_char == '.' {
             Token::Number(self.get_number(last_char))
+        } else if last_char == '#' {
+            Token::Comment(self.skip_line())
         } else {
             Token::Unknown(last_char)
         }
