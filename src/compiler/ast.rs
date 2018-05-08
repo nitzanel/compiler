@@ -1,59 +1,76 @@
-// Empty trait to mark an AST object.
-pub trait AST {}
+// Empty trait to mark an ExprAST object.
+pub trait ExprAST {}
 
-#[derive(AST)]
+#[derive(ExprAST)]
+pub struct EmptyExpr {}
+
+#[derive(ExprAST)]
 pub struct NumberExprAST {
     value: f64,
 }
 
-#[derive(AST)]
+#[derive(ExprAST)]
 pub struct VariableExprAST {
     name: String,
 }
 
-#[derive(AST)]
+#[derive(ExprAST)]
 pub struct BinaryExprAST {
     op: char,
-    left: AST,
-    right: AST,
+    left: ExprAST,
+    right: ExprAST,
 }
 
-#[derive(AST)]
+#[derive(ExprAST)]
 pub struct CallExprAST {
     callee: String,
-    args: vec<AST>,
+    args: vec<ExprAST>,
 }
 
+#[derive(ExprAST)]
 pub struct PrototypeAST {
     name: String,
     args: vec<String>,
 }
 
+#[derive(ExprAST)]
 pub struct FunctionAST {
     proto: PrototypeAST,
-    body: AST,
+    body: ExprAST,
+}
+
+impl FunctionAST {
+    pub fn new(proto: PrototypeAST, body: ExprAST) {
+        FunctionAST { proto, body }
+    }
+}
+
+impl PrototypeAST {
+    pub fn new(name: String, args: vec<String>) -> Self {
+        PrototypeAST { name, args }
+    }
 }
 
 impl CallExprAST {
-    pub fn new(callee: String, args: vec<AST>) {
+    pub fn new(callee: String, args: vec<ExprAST>) -> Self {
         CallExprAST { callee, args }
     }
 }
 
 impl BinaryExprAST {
-    pub fn new(op: char, left: AST, right: AST) {
+    pub fn new(op: char, left: ExprAST, right: ExprAST) -> Self {
         BinaryExprAST { op, left, right }
     }
 }
 
 impl VariableExprAST {
-    pub fn new(name: String) {
+    pub fn new(name: String) -> Self {
         VariableExprAST { name }
     }
 }
 
 impl NumberExprAST {
-    pub fn new(value: f64) {
+    pub fn new(value: f64) -> Self {
         NumberExprAST { value }
     }
 }

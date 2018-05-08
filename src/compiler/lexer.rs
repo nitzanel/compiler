@@ -66,6 +66,12 @@ impl<'a> Lexer<'a> {
             Token::Number(self.get_number(last_char))
         } else if last_char == '#' {
             Token::Comment(self.skip_line())
+        } else if last_char == '(' {
+            Token::LParen
+        } else if last_char == ')' {
+            Token::RParen
+        } else if last_char == ',' {
+            Token::Comma
         } else {
             Token::Unknown(last_char)
         }

@@ -11,6 +11,13 @@ pub enum Token {
     Identity(String),
     Number(f64),
 
+    // paren
+    RParen,
+    LParen,
+
+    // comman
+    Comma,
+
     // Unknown
     Unknown(char),
 
