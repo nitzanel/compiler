@@ -1,8 +1,8 @@
 // Languge keywords
 extern crate itertools;
 
-static DEF_STRING: &str = "def";
-static EXTERN_STRING: &str = "extern";
+const DEF_STRING: &str = "def";
+const EXTERN_STRING: &str = "extern";
 
 use self::itertools::Itertools;
 use std::iter::Peekable;
@@ -56,25 +56,24 @@ impl<'a> Lexer<'a> {
             let ident_string = self.get_identifier_string();
             // Alphabetic of [a-zA-Z][a-zA-Z0-9]*
 
-            if ident_string == DEF_STRING {
-                Token::Def
-            } else if ident_string == EXTERN_STRING {
-                Token::Extern
-            } else {
-                Token::Identity(ident_string)
+            match ident_string.as_ref() {
+                DEF_STRING => Token::Def,
+                EXTERN_STRING => Token::Extern,
+                _ => Token::Identity(ident_string),
             }
         } else if last_char.is_digit(10) || last_char == '.' {
+            // Number of the form [.0-9]*
             Token::Number(self.get_number())
-        } else if last_char == '#' {
-            Token::Comment(self.skip_line())
-        } else if last_char == '(' {
-            Token::LParen
-        } else if last_char == ')' {
-            Token::RParen
-        } else if last_char == ',' {
-            Token::Comma
         } else {
-            Token::Unknown(last_char)
+            // Consume the char
+            self.input.next().unwrap();
+            match last_char {
+                '#' => Token::Comment(self.skip_line()),
+                '(' => Token::LParen,
+                ')' => Token::RParen,
+                ',' => Token::Comma,
+                _ => Token::Unknown(last_char),
+            }
         }
     }
 }
@@ -102,6 +101,18 @@ mod tests {
     }
 
     #[test]
+    fn test_call_function_tokens() {
+        let mut lex = Lexer::new("hello(49, 8.200)");
+        assert_eq!(lex.get_token(), Token::Identity("hello".to_string()));
+        assert_eq!(lex.get_token(), Token::LParen);
+        assert_eq!(lex.get_token(), Token::Number(49.));
+        assert_eq!(lex.get_token(), Token::Comma);
+        assert_eq!(lex.get_token(), Token::Number(8.200));
+        assert_eq!(lex.get_token(), Token::RParen);
+        assert_eq!(lex.get_token(), Token::EOF);
+    }
+
+    #[test]
     fn test_unknown_token() {
         let mut lex = Lexer::new("?");
         assert_eq!(lex.get_token(), Token::Unknown('?'));
@@ -112,7 +123,7 @@ mod tests {
         let mut lex = Lexer::new("#this is a comment\n 3.1");
         assert_eq!(
             lex.get_token(),
-            Token::Comment("#this is a comment".to_string())
+            Token::Comment("this is a comment".to_string())
         );
         assert_eq!(lex.get_token(), Token::Number(3.1));
         assert_eq!(lex.get_token(), Token::EOF);
