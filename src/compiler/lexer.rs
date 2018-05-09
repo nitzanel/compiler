@@ -1,6 +1,6 @@
-// Languge keywords
 extern crate itertools;
 
+// Languge keywords
 const DEF_STRING: &str = "def";
 const EXTERN_STRING: &str = "extern";
 
@@ -19,6 +19,17 @@ impl<'a> Lexer<'a> {
         Lexer {
             input: input.chars().peekable(),
         }
+    }
+
+    pub fn get_all_tokens(&mut self) -> Vec<Token> {
+        let mut tokens = Vec::new();
+        while true {
+            tokens.push(self.get_token());
+            if *tokens.last().unwrap() == Token::EOF {
+                break;
+            }
+        }
+        tokens
     }
 
     fn get_identifier_string(&mut self) -> String {
@@ -127,5 +138,11 @@ mod tests {
         );
         assert_eq!(lex.get_token(), Token::Number(3.1));
         assert_eq!(lex.get_token(), Token::EOF);
+    }
+
+    #[test]
+    fn test_get_all_tokens() {
+        let mut lex = Lexer::new("4.9");
+        assert_eq!(lex.get_all_tokens(), vec![Token::Number(4.9), Token::EOF]);
     }
 }
