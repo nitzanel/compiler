@@ -12,24 +12,19 @@ use compiler::Token;
 
 pub struct Lexer<'a> {
     input: Peekable<Chars<'a>>,
+    reached_eof: bool,
 }
 
 impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Self {
         Lexer {
             input: input.chars().peekable(),
+            reached_eof: false,
         }
     }
 
     pub fn get_all_tokens(&mut self) -> Vec<Token> {
-        let mut tokens = Vec::new();
-        while true {
-            tokens.push(self.get_token());
-            if *tokens.last().unwrap() == Token::EOF {
-                break;
-            }
-        }
-        tokens
+        self.collect::<Vec<Token>>()
     }
 
     fn get_identifier_string(&mut self) -> String {
@@ -60,7 +55,10 @@ impl<'a> Lexer<'a> {
 
         let last_char = match self.input.peek() {
             Some(c) => *c,
-            None => return Token::EOF,
+            None => {
+                self.reached_eof = true;
+                return Token::EOF;
+            }
         };
 
         if last_char.is_alphabetic() {
@@ -85,6 +83,17 @@ impl<'a> Lexer<'a> {
                 ',' => Token::Comma,
                 _ => Token::Unknown(last_char),
             }
+        }
+    }
+}
+
+impl<'a> Iterator for Lexer<'a> {
+    type Item = Token;
+    fn next(&mut self) -> Option<Token> {
+        if self.reached_eof {
+            None
+        } else {
+            Some(self.get_token())
         }
     }
 }
@@ -144,5 +153,12 @@ mod tests {
     fn test_get_all_tokens() {
         let mut lex = Lexer::new("4.9");
         assert_eq!(lex.get_all_tokens(), vec![Token::Number(4.9), Token::EOF]);
+    }
+
+    #[test]
+    fn test_lexer_as_iterator() {
+        let mut lex = Lexer::new("4.9");
+        assert_eq!(lex.next(), Some(Token::Number(4.9)));
+        assert_eq!(lex.next(), Some(Token::EOF));
     }
 }

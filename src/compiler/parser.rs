@@ -1,17 +1,25 @@
 use compiler::Lexer;
 use compiler::ast;
 
+use compiler::Token;
+use std::iter::{Iterator, Peekable};
+
 pub struct Parser {
-    lexer: Lexer,
+    input: Peekable<Iterator<Item=Token>>,
 }
 
 impl Parser {
+    pub fn new(lexer: Lexer) {
+        Parser {
+        input: lexer.get_all_tokens().iter().peekable()
+        }
+    }
+
     fn parse_number_expr(&mut self) -> ast::ExprAST {
-        let token = self.lexer.get_token();
-        if let Token::Number(n) = token {
+        if let Some(Token::Number(n)) = self.input.next() {
             ast::NumberExprAST::new(n)
         }
-        panic!("parse_number_expr expected Token::Number. recieved {}",);
+        panic!("parse_number_expr expected Token::Number. recieved {}", );
     }
 
     fn parse_paren_expr(&mut self) -> ast::ExprAST {
