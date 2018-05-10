@@ -49,7 +49,7 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn get_token(&mut self) -> Token {
-        self.input
+        let _dropped_whitespace = self.input
             .take_while_ref(|c| c.is_whitespace())
             .collect::<String>();
 
