@@ -52,22 +52,15 @@ where
     }
 }
 
-pub struct CallExprAST<T: ExprAST> {
+pub struct CallExprAST {
     callee: String,
-    args: Vec<T>,
+    args: Vec<Box<ExprAST>>,
 }
 
-impl<T> ExprAST for CallExprAST<T>
-where
-    T: ExprAST,
-{
-}
+impl ExprAST for CallExprAST {}
 
-impl<T> CallExprAST<T>
-where
-    T: ExprAST,
-{
-    pub fn new(callee: String, args: Vec<T>) -> Self {
+impl CallExprAST {
+    pub fn new(callee: String, args: Vec<Box<ExprAST>>) -> Self {
         CallExprAST { callee, args }
     }
 }
