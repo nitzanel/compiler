@@ -11,11 +11,16 @@ pub enum Token {
     Identity(String),
     Number(f64),
 
+    // Binary Operations
+    Add,
+    Sub,
+    Mul,
+    Div,
+
     // paren
     RParen,
     LParen,
 
-    // comman
     Comma,
 
     // Unknown

@@ -81,6 +81,10 @@ impl<'a> Lexer<'a> {
                 '(' => Token::LParen,
                 ')' => Token::RParen,
                 ',' => Token::Comma,
+                '+' => Token::Add,
+                '-' => Token::Sub,
+                '*' => Token::Mul,
+                '/' => Token::Div,
                 _ => Token::Unknown(last_char),
             }
         }
@@ -161,4 +165,19 @@ mod tests {
         assert_eq!(lex.next(), Some(Token::Number(4.9)));
         assert_eq!(lex.next(), Some(Token::EOF));
     }
+
+    #[test]
+    fn test_operator_tokenization() {
+        let mut lex = Lexer::new("-4.9 + 8 * 200 / 90");
+        assert_eq!(lex.next(), Some(Token::Sub));
+        assert_eq!(lex.next(), Some(Token::Number(4.9)));
+        assert_eq!(lex.next(), Some(Token::Add));
+        assert_eq!(lex.next(), Some(Token::Number(8.)));
+        assert_eq!(lex.next(), Some(Token::Mul));
+        assert_eq!(lex.next(), Some(Token::Number(200.)));
+        assert_eq!(lex.next(), Some(Token::Div));
+        assert_eq!(lex.next(), Some(Token::Number(90.)));
+        assert_eq!(lex.next(), Some(Token::EOF));
+    }
+
 }

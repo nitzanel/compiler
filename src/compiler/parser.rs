@@ -53,12 +53,20 @@ impl Parser {
         }
     }
 
-    fn parse_number_expr(&mut self) -> impl ast::ExprAST {
+    fn parse_number_expr(&mut self) -> Box<ast::ExprAST> {
         match self.input.next().unwrap() {
-            Token::Number(n) => ast::NumberExprAST::new(n),
+            Token::Number(n) => Box::new(ast::NumberExprAST::new(n)),
             token => panic!("unexpeted token {:?}", token),
         }
     }
+
+    //fn parse_paren_expr(&mut self) -> Box<ast::ExprAST> {
+
+    //}
+
+    //fn parse_binary_expr(&mut self) -> Box<ast::ExprAST> {
+
+    //}
 
     fn parse_identifier_expr(&mut self) -> Box<ast::ExprAST> {
         let name = match self.input.next().unwrap() {
@@ -85,7 +93,7 @@ impl Parser {
             match self.input.peek().unwrap() {
                 Token::RParen => break,
                 Token::Identity(_) => args.push(self.parse_identifier_expr()),
-                Token::Number(_) => args.push(Box::new(self.parse_number_expr())),
+                Token::Number(_) => args.push(self.parse_number_expr()),
                 token => panic!("Unexpected token {:?}", token),
             };
             // Nothing advances to the next token, use next instead of peek

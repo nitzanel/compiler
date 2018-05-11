@@ -1,4 +1,5 @@
 // Empty trait to mark an ExprAST object.
+use compiler::Token;
 use std::any::Any;
 use std::fmt::Debug;
 
@@ -51,7 +52,7 @@ impl VariableExprAST {
 
 #[derive(Debug, PartialEq)]
 pub struct BinaryExprAST<T: ExprAST, S: ExprAST> {
-    op: char,
+    op: Token,
     left: T,
     right: S,
 }
@@ -71,7 +72,7 @@ where
     T: ExprAST,
     S: ExprAST,
 {
-    pub fn new(op: char, left: T, right: S) -> Self {
+    pub fn new(op: Token, left: T, right: S) -> Self {
         BinaryExprAST { op, left, right }
     }
 }
@@ -151,11 +152,11 @@ mod tests {
         let left = NumberExprAST::new(4.9);
         let right = NumberExprAST::new(8.200);
         let other = NumberExprAST::new(9.0);
-        let op = '+';
-        let expr = BinaryExprAST::new(op, left, right);
+        let expr = BinaryExprAST::new(Token::Add, left, right);
+        assert_eq!(expr.op, Token::Add);
         assert_eq!(expr.left.value, 4.9);
         assert_eq!(expr.right.value, 8.200);
-        let expr2 = BinaryExprAST::new(op, expr, other);
+        let expr2 = BinaryExprAST::new(Token::Add, expr, other);
         assert_eq!(expr2.left.left.value, 4.9);
     }
 }
