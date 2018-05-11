@@ -1,10 +1,22 @@
 // Empty trait to mark an ExprAST object.
+//
+
+use std::any::{Any, TypeId};
+
 use compiler::Token;
-use std::any::Any;
 use std::fmt::Debug;
 
 pub trait ExprAST: Debug {
     fn as_any(&self) -> &Any;
+}
+
+pub enum Expression {
+    Number(f64),
+    Variable(String),
+    Binary(Token, Box<Expression>, Box<Expression>),
+    Call(String, Vec<Box<Expression>>),
+    Prototype(String, Vec<String>),
+    Function(String, Vec<String>, Box<Expression>),
 }
 
 #[derive(Debug, PartialEq)]
@@ -50,29 +62,21 @@ impl VariableExprAST {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub struct BinaryExprAST<T: ExprAST, S: ExprAST> {
+#[derive(Debug)]
+pub struct BinaryExprAST {
     op: Token,
-    left: T,
-    right: S,
+    left: Box<ExprAST>,
+    right: Box<ExprAST>,
 }
 
-impl<T: 'static, S: 'static> ExprAST for BinaryExprAST<T, S>
-where
-    T: ExprAST,
-    S: ExprAST,
-{
+impl ExprAST for BinaryExprAST {
     fn as_any(&self) -> &Any {
         self
     }
 }
 
-impl<T, S> BinaryExprAST<T, S>
-where
-    T: ExprAST,
-    S: ExprAST,
-{
-    pub fn new(op: Token, left: T, right: S) -> Self {
+impl BinaryExprAST {
+    pub fn new(op: Token, left: Box<ExprAST>, right: Box<ExprAST>) -> Self {
         BinaryExprAST { op, left, right }
     }
 }
@@ -114,25 +118,19 @@ impl PrototypeAST {
 }
 
 #[derive(Debug)]
-pub struct FunctionAST<T: ExprAST> {
+pub struct FunctionAST {
     proto: PrototypeAST,
-    body: T,
+    body: Box<ExprAST>,
 }
 
-impl<T: 'static> ExprAST for FunctionAST<T>
-where
-    T: ExprAST,
-{
+impl ExprAST for FunctionAST {
     fn as_any(&self) -> &Any {
         self
     }
 }
 
-impl<T> FunctionAST<T>
-where
-    T: ExprAST,
-{
-    pub fn new(proto: PrototypeAST, body: T) -> Self {
+impl FunctionAST {
+    pub fn new(proto: PrototypeAST, body: Box<ExprAST>) -> Self {
         FunctionAST { proto, body }
     }
 }
@@ -149,14 +147,43 @@ mod tests {
 
     #[test]
     fn test_binary_expr() {
-        let left = NumberExprAST::new(4.9);
-        let right = NumberExprAST::new(8.200);
-        let other = NumberExprAST::new(9.0);
+        let left = Box::new(NumberExprAST::new(4.9));
+        let right = Box::new(NumberExprAST::new(8.200));
+        let other = Box::new(NumberExprAST::new(9.0));
         let expr = BinaryExprAST::new(Token::Add, left, right);
         assert_eq!(expr.op, Token::Add);
-        assert_eq!(expr.left.value, 4.9);
-        assert_eq!(expr.right.value, 8.200);
-        let expr2 = BinaryExprAST::new(Token::Add, expr, other);
-        assert_eq!(expr2.left.left.value, 4.9);
+        assert_eq!(
+            expr.left
+                .as_any()
+                .downcast_ref::<NumberExprAST>()
+                .unwrap()
+                .value,
+            4.9
+        );
+        assert_eq!(
+            expr.right
+                .as_any()
+                .downcast_ref::<NumberExprAST>()
+                .unwrap()
+                .value,
+            8.200
+        );
+        let expr2 = BinaryExprAST::new(Token::Add, Box::new(expr), other);
+        assert_eq!(
+            expr2
+                .left
+                .as_any()
+                .downcast_ref::<BinaryExprAST>()
+                .unwrap()
+                .left
+                .as_any()
+                .downcast_ref::<NumberExprAST>()
+                .unwrap()
+                .value,
+            4.9
+        );
+        if TypeId::of::<NumberExprAST>() == expr2.left.as_any().get_type_id() {
+            panic!("binary");
+        }
     }
 }
