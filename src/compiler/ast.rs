@@ -5,18 +5,8 @@ use std::any::{Any, TypeId};
 
 use compiler::Token;
 use std::fmt::Debug;
-
 pub trait ExprAST: Debug {
     fn as_any(&self) -> &Any;
-}
-
-pub enum Expression {
-    Number(f64),
-    Variable(String),
-    Binary(Token, Box<Expression>, Box<Expression>),
-    Call(String, Vec<Box<Expression>>),
-    Prototype(String, Vec<String>),
-    Function(String, Vec<String>, Box<Expression>),
 }
 
 #[derive(Debug, PartialEq)]
@@ -182,8 +172,5 @@ mod tests {
                 .value,
             4.9
         );
-        if TypeId::of::<NumberExprAST>() == expr2.left.as_any().get_type_id() {
-            panic!("binary");
-        }
     }
 }

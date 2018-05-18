@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Nitzanel <nitzan@claysciences.com>"]
 
 [dependencies]
-itertools = '*'
+itertools = "*"
+match_cast = "0.1.2"

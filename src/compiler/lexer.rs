@@ -8,7 +8,7 @@ use self::itertools::Itertools;
 use std::iter::Peekable;
 use std::str::Chars;
 
-use compiler::Token;
+use compiler::{BinaryOp, Token};
 
 pub struct Lexer<'a> {
     input: Peekable<Chars<'a>>,
@@ -81,10 +81,10 @@ impl<'a> Lexer<'a> {
                 '(' => Token::LParen,
                 ')' => Token::RParen,
                 ',' => Token::Comma,
-                '+' => Token::Add,
-                '-' => Token::Sub,
-                '*' => Token::Mul,
-                '/' => Token::Div,
+                '+' => Token::BinOp(BinaryOp::Add),
+                '-' => Token::BinOp(BinaryOp::Sub),
+                '*' => Token::BinOp(BinaryOp::Mul),
+                '/' => Token::BinOp(BinaryOp::Div),
                 _ => Token::Unknown(last_char),
             }
         }

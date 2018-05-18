@@ -60,13 +60,43 @@ impl Parser {
         }
     }
 
-    //fn parse_paren_expr(&mut self) -> Box<ast::ExprAST> {
+    fn parse_paren_expr(&mut self) -> Box<ast::ExprAST> {
+        self.input.next().unwrap();
+        let mut last_expr: Box<ast::ExprAST> = Box::new(ast::EmptyExpr {});
+        loop {
+            let result = match self.input.peek().unwrap() {
+                Token::RParen => break,
+                Token::LParen => self.parse_paren_expr(),
+                Token::Identity(_) => self.parse_identifier_expr(),
+                Token::Number(_) => self.parse_number_expr(),
+                Token::Add | Token::Sub | Token::Mul | Token::Div => {
+                    self.parse_binary_expr(last_expr)
+                }
+                token => panic!("unexpected token {:?}", token),
+            };
+            last_expr = result;
+        }
+        // Eat token
+        self.input.next().unwrap();
+        last_expr
+    }
+    
+    fn parse_expr(&mut self) -> Box<ast::ExprAST> {
+        match self.input.peek().unwrap() {
+                Token::LParen => self.parse_paren_expr(),
+                Token::Identity(_) => self.parse_identifier_expr(),
+                Token::Number(_) => self.parse_number_expr(),
+                _ => panic!("Todo"),
+        }
+    }
 
-    //}
-
-    //fn parse_binary_expr(&mut self) -> Box<ast::ExprAST> {
-
-    //}
+    fn parse_binary_expr(&mut self, last_expr: Box<ast::ExprAST>) -> Box<ast::ExprAST> {
+        let op = self.input.next().unwrap();
+        let right = match self.input.peek().unwrap() {
+            Token::LParen => self.parse_paren_expr(),
+            Token::Identity(_) => self.parse_call_expression
+        }
+    }
 
     fn parse_identifier_expr(&mut self) -> Box<ast::ExprAST> {
         let name = match self.input.next().unwrap() {

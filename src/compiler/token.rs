@@ -12,10 +12,7 @@ pub enum Token {
     Number(f64),
 
     // Binary Operations
-    Add,
-    Sub,
-    Mul,
-    Div,
+    BinOp(BinaryOp),
 
     // paren
     RParen,
@@ -27,4 +24,12 @@ pub enum Token {
     Unknown(char),
 
     Comment(String),
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum BinaryOp {
+    Add,
+    Sub,
+    Mul,
+    Div,
 }
