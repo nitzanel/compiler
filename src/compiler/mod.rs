@@ -1,3 +1,4 @@
+/// # The compiler crate
 mod token;
 pub use self::token::{BinaryOp, Token};
 mod lexer;

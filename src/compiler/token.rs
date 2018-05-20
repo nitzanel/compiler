@@ -1,3 +1,5 @@
+/// # Token
+/// Represent the basic construct which text is first parsed into, before further processing.
 #[derive(PartialEq, Debug, Clone)]
 pub enum Token {
     // EOF
@@ -37,6 +39,7 @@ pub enum Token {
     Comment(String),
 }
 
+/// Binary ops that are currently in use.
 #[derive(Eq, PartialEq, Debug, Clone, Hash)]
 pub enum BinaryOp {
     Add,
