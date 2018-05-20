@@ -3,6 +3,10 @@ extern crate itertools;
 // Languge keywords
 const DEF_STRING: &str = "def";
 const EXTERN_STRING: &str = "extern";
+const LET_STRING: &str = "let";
+const IF_STRING: &str = "if";
+const ELSE_STRING: &str = "else";
+const THEN_STRING: &str = "then";
 
 use self::itertools::Itertools;
 use std::iter::Peekable;
@@ -68,6 +72,10 @@ impl<'a> Lexer<'a> {
             match ident_string.as_ref() {
                 DEF_STRING => Token::Def,
                 EXTERN_STRING => Token::Extern,
+                IF_STRING => Token::If,
+                ELSE_STRING => Token::Else,
+                THEN_STRING => Token::Then,
+                LET_STRING => Token::Let,
                 _ => Token::Identity(ident_string),
             }
         } else if last_char.is_digit(10) || last_char == '.' {

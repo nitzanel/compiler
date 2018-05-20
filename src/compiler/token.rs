@@ -7,6 +7,17 @@ pub enum Token {
     Def,
     Extern,
 
+    // Flow control
+    If,
+    Then,
+    Else,
+
+    // Variables
+    Let,
+
+    // Semi colon
+    Delimeter,
+
     // Primary
     Identity(String),
     Number(f64),

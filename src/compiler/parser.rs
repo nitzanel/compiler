@@ -1,8 +1,21 @@
-use compiler::ast;
 use compiler::Lexer;
+use compiler::ast;
+use compiler::ast::*;
 
 use compiler::Token;
 use std::iter::Iterator;
+
+/* Grammar:
+ * program          : [[statement | expression] Delimiter ? ]*;
+ * statement        : [declaration | definition];
+ * declaration      : Extern prototype;
+ * definition       : Def prototype expression;
+ * prototype        : Ident OpeningParenthesis [Ident Comma ?]* ClosingParenthesis;
+ * expression       : [primary_expr (Op primary_expr)*];
+ * primary_expr     : [Ident | Number | call_expr | parenthesis_expr];
+ * call_expr        : Ident OpeningParenthesis [expression Comma ?]* ClosingParenthesis;
+ * parenthesis_expr : OpeningParenthesis expression ClosingParenthesis;
+ */
 
 pub struct TokenIterator {
     tokens: Vec<Token>,
@@ -46,6 +59,8 @@ pub struct Parser {
     input: TokenIterator,
 }
 
+pub type ParsingResult = Result<(Vec<ASTNode>, Vec<Token>), String>;
+
 impl Parser {
     pub fn new(lexer: Lexer) -> Self {
         Parser {
@@ -53,119 +68,5 @@ impl Parser {
         }
     }
 
-    fn parse_number_expr(&mut self) -> Box<ast::ExprAST> {
-        match self.input.next().unwrap() {
-            Token::Number(n) => Box::new(ast::NumberExprAST::new(n)),
-            token => panic!("unexpeted token {:?}", token),
-        }
-    }
-
-    fn parse_paren_expr(&mut self) -> Box<ast::ExprAST> {
-        self.input.next().unwrap();
-        let mut last_expr: Box<ast::ExprAST> = Box::new(ast::EmptyExpr {});
-        loop {
-            let result = match self.input.peek().unwrap() {
-                Token::RParen => break,
-                Token::LParen => self.parse_paren_expr(),
-                Token::Identity(_) => self.parse_identifier_expr(),
-                Token::Number(_) => self.parse_number_expr(),
-                Token::Add | Token::Sub | Token::Mul | Token::Div => {
-                    self.parse_binary_expr(last_expr)
-                }
-                token => panic!("unexpected token {:?}", token),
-            };
-            last_expr = result;
-        }
-        // Eat token
-        self.input.next().unwrap();
-        last_expr
-    }
-    
-    fn parse_expr(&mut self) -> Box<ast::ExprAST> {
-        match self.input.peek().unwrap() {
-                Token::LParen => self.parse_paren_expr(),
-                Token::Identity(_) => self.parse_identifier_expr(),
-                Token::Number(_) => self.parse_number_expr(),
-                _ => panic!("Todo"),
-        }
-    }
-
-    fn parse_binary_expr(&mut self, last_expr: Box<ast::ExprAST>) -> Box<ast::ExprAST> {
-        let op = self.input.next().unwrap();
-        let right = match self.input.peek().unwrap() {
-            Token::LParen => self.parse_paren_expr(),
-            Token::Identity(_) => self.parse_call_expression
-        }
-    }
-
-    fn parse_identifier_expr(&mut self) -> Box<ast::ExprAST> {
-        let name = match self.input.next().unwrap() {
-            Token::Identity(s) => s.to_string(),
-            token => panic!("token {:?}", token),
-        };
-        if let Token::LParen = self.input.peek().unwrap() {
-            // throw the one we peeked on
-            self.input.next().unwrap();
-            self.parse_call_expression(name)
-        } else {
-            self.parse_variable_expression(name)
-        }
-    }
-
-    fn parse_variable_expression(&mut self, name: String) -> Box<ast::ExprAST> {
-        Box::new(ast::VariableExprAST::new(name))
-    }
-
-    fn parse_call_expression(&mut self, callee: String) -> Box<ast::ExprAST> {
-        let mut args: Vec<Box<ast::ExprAST>> = Vec::new();
-        loop {
-            // The functions here advances to the next token
-            match self.input.peek().unwrap() {
-                Token::RParen => break,
-                Token::Identity(_) => args.push(self.parse_identifier_expr()),
-                Token::Number(_) => args.push(self.parse_number_expr()),
-                token => panic!("Unexpected token {:?}", token),
-            };
-            // Nothing advances to the next token, use next instead of peek
-            match self.input.next().unwrap() {
-                Token::RParen => break,
-                Token::Comma => continue,
-                token => panic!("unexpceted token {:?}", token),
-            };
-        }
-        Box::new(ast::CallExprAST::new(callee, args))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_parse_call_expression() {
-        let lexer = Lexer::new("hello(1,2)");
-        let mut parser = Parser::new(lexer);
-        let expected = ast::CallExprAST::new(
-            "hello".to_string(),
-            vec![
-                Box::new(ast::NumberExprAST::new(1.)),
-                Box::new(ast::NumberExprAST::new(2.)),
-            ],
-        );
-        let result = parser.parse_identifier_expr();
-        let call = result.as_any().downcast_ref::<ast::CallExprAST>().unwrap();
-        assert_eq!(call.callee, expected.callee);
-        assert_eq!(call.args.len(), expected.args.len());
-        for i in 0..expected.args.len() {
-            let res = call.args[i]
-                .as_any()
-                .downcast_ref::<ast::NumberExprAST>()
-                .unwrap();
-            let exp = expected.args[i]
-                .as_any()
-                .downcast_ref::<ast::NumberExprAST>()
-                .unwrap();
-            assert_eq!(*res, *exp);
-        }
-    }
+    pub fn parse(parsed_tree: Vec<
 }
