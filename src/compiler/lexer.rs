@@ -168,7 +168,7 @@ mod tests {
     #[test]
     fn test_get_all_tokens() {
         let mut lex = Lexer::new("4.9");
-        assert_eq!(lex.get_all_tokens(), vec![Token::Number(4.9), Token::EOF]);
+        assert_eq!(lex.get_all_tokens(), vec![Token::Number(4.9)]);
     }
 
     #[test]
