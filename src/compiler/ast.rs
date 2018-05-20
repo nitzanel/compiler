@@ -1,3 +1,5 @@
+use compiler::BinaryOp;
+
 #[derive(PartialEq, Clone, Debug)]
 pub enum ASTNode {
     ExternNode(Prototype),
@@ -19,7 +21,7 @@ pub struct Prototype {
 #[derive(PartialEq, Clone, Debug)]
 pub enum Expression {
     LiteralExpr(f64),
-    VariableExpr(f64),
-    BinaryExr(String, Box<Expression>, Box<Expression>),
+    VariableExpr(String),
+    BinaryExpr(BinaryOp, Box<Expression>, Box<Expression>),
     CallExpr(String, Vec<Expression>),
 }

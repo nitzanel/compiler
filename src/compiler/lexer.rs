@@ -28,7 +28,10 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn get_all_tokens(&mut self) -> Vec<Token> {
-        self.collect::<Vec<Token>>()
+        let mut tokens = self.collect::<Vec<Token>>();
+        // Remove the last EOF token.
+        tokens.pop();
+        tokens
     }
 
     fn get_identifier_string(&mut self) -> String {
@@ -85,6 +88,7 @@ impl<'a> Lexer<'a> {
             // Consume the char
             self.input.next().unwrap();
             match last_char {
+                ';' => Token::Delimeter,
                 '#' => Token::Comment(self.skip_line()),
                 '(' => Token::LParen,
                 ')' => Token::RParen,
@@ -177,13 +181,13 @@ mod tests {
     #[test]
     fn test_operator_tokenization() {
         let mut lex = Lexer::new("-4.9 + 8 * 200 / 90");
-        assert_eq!(lex.next(), Some(Token::Sub));
+        assert_eq!(lex.next(), Some(Token::BinOp(BinaryOp::Sub)));
         assert_eq!(lex.next(), Some(Token::Number(4.9)));
-        assert_eq!(lex.next(), Some(Token::Add));
+        assert_eq!(lex.next(), Some(Token::BinOp(BinaryOp::Add)));
         assert_eq!(lex.next(), Some(Token::Number(8.)));
-        assert_eq!(lex.next(), Some(Token::Mul));
+        assert_eq!(lex.next(), Some(Token::BinOp(BinaryOp::Mul)));
         assert_eq!(lex.next(), Some(Token::Number(200.)));
-        assert_eq!(lex.next(), Some(Token::Div));
+        assert_eq!(lex.next(), Some(Token::BinOp(BinaryOp::Div)));
         assert_eq!(lex.next(), Some(Token::Number(90.)));
         assert_eq!(lex.next(), Some(Token::EOF));
     }

@@ -37,10 +37,11 @@ pub enum Token {
     Comment(String),
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(Eq, PartialEq, Debug, Clone, Hash)]
 pub enum BinaryOp {
     Add,
     Sub,
     Mul,
     Div,
+    Shift,
 }
