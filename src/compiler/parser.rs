@@ -351,3 +351,65 @@ fn parse_binary_expr(
 
     PartParsingResult::Good(result, parsed_tokens)
 }
+
+#[cfg(test)]
+mod tests {
+    use self::Token::*;
+    use super::*;
+
+    #[test]
+    fn test_function_dec_statement() {
+        let mut parser_settings = ParserSettings::default();
+        let tokens = vec![
+            Def,
+            Identity("test".to_string()),
+            LParen,
+            Identity("x".to_string()),
+            RParen,
+            Identity("x".to_string()),
+        ];
+        let result = parse(
+            tokens.as_slice(),
+            Vec::new().as_slice(),
+            &mut parser_settings,
+        );
+        let expected_left_over_tokens = Vec::new();
+        let expected_function = Function {
+            prototype: Prototype {
+                name: "test".to_string(),
+                args: vec!["x".to_string()],
+            },
+            body: Expression::VariableExpr("x".to_string()),
+        };
+        let expected_ast = vec![ASTNode::FunctionNode(expected_function)];
+        let expected = Ok((expected_ast, expected_left_over_tokens));
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn test_extern_decleration() {
+        let mut parser_settings = ParserSettings::default();
+        let tokens = vec![
+            Extern,
+            Identity("sin".to_string()),
+            LParen,
+            Identity("x".to_string()),
+            RParen,
+        ];
+        let result = parse(
+            tokens.as_slice(),
+            Vec::new().as_slice(),
+            &mut parser_settings,
+        );
+
+        let expected_tokens = vec![];
+        let expected_ast = vec![ASTNode::ExternNode(Prototype {
+            name: "sin".to_string(),
+            args: vec!["x".to_string()],
+        })];
+
+        let expected = Ok((expected_ast, expected_tokens));
+
+        assert_eq!(expected, result);
+    }
+}
