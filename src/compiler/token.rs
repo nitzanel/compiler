@@ -16,10 +16,10 @@ pub enum Token {
 
     // Variables
     Let,
+    Assign,
 
     // Semi colon
     Delimeter,
-
     // Primary
     Identity(String),
     Number(f64),

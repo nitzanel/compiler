@@ -1,9 +1,6 @@
 use compiler::ast::*;
-use compiler::Lexer;
-
 use compiler::{BinaryOp, Token};
 use std::collections::HashMap;
-use std::iter::Iterator;
 
 /* Grammar:
  * program          : [[statement | expression] Delimiter ? ]*;
@@ -223,9 +220,38 @@ fn parse_primary_expr(
         Some(Token::Identity(_)) => parse_ident_expr(tokens, settings),
         Some(Token::Number(_)) => parse_literal_expr(tokens, settings),
         Some(Token::LParen) => parse_parenthesis_expr(tokens, settings),
+        Some(Token::Let) => parse_assignment_expr(tokens, settings),
         None => return PartParsingResult::NotComplete,
         token => error(format!("unknown token {:?} when expecting an expression.", token).as_str()),
     }
+}
+
+fn parse_assignment_expr(
+    tokens: &mut Vec<Token>,
+    settings: &mut ParserSettings,) -> PartParsingResult<Expression> {
+    let mut parsed_tokens = Vec::new();
+
+    expect_token!(
+        [Token::Let, Token::Let, ()]
+        else { return PartParsingResult::Bad("Expected let keyword".to_string())}
+        <= tokens, parsed_tokens
+        );
+
+    let ident = if let Expression::VariableExpr(name) = parse_try!(parse_ident_expr, tokens, settings, parsed_tokens)  {
+            name
+        } else {
+            return PartParsingResult::Bad("Expected identifactor after let keyword".to_string());
+        };
+
+    expect_token!(
+        [Token::Assign, Token::Assign, ()]
+        else { return PartParsingResult::Bad("Expected = token".to_string())}
+        <= tokens, parsed_tokens
+        );
+
+    let assign_to = Box::new(parse_try!(parse_expr, tokens, settings, parsed_tokens));
+
+    PartParsingResult::Good(Expression::AssignmentOp(ident, assign_to), parsed_tokens)
 }
 
 fn parse_ident_expr(
@@ -260,7 +286,7 @@ fn parse_ident_expr(
 
 fn parse_literal_expr(
     tokens: &mut Vec<Token>,
-    settings: &mut ParserSettings,
+    _settings: &mut ParserSettings,
 ) -> PartParsingResult<Expression> {
     let mut parsed_tokens = Vec::new();
 

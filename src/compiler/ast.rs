@@ -23,5 +23,6 @@ pub enum Expression {
     LiteralExpr(f64),
     VariableExpr(String),
     BinaryExpr(BinaryOp, Box<Expression>, Box<Expression>),
+    AssignmentOp(String, Box<Expression>),
     CallExpr(String, Vec<Expression>),
 }

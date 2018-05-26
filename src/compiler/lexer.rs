@@ -36,7 +36,7 @@ impl<'a> Lexer<'a> {
 
     fn get_identifier_string(&mut self) -> String {
         self.input
-            .take_while_ref(|c| c.is_alphanumeric())
+            .take_while_ref(|c| c.is_alphanumeric() || *c == '_')
             .collect::<String>()
     }
 
@@ -88,6 +88,7 @@ impl<'a> Lexer<'a> {
             // Consume the char
             self.input.next().unwrap();
             match last_char {
+                '=' => Token::Assign,
                 ';' => Token::Delimeter,
                 '#' => Token::Comment(self.skip_line()),
                 '(' => Token::LParen,
