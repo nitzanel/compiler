@@ -1,3 +1,4 @@
+use compiler::{ASMBuilder, ASMGenerator};
 use compiler::parser;
 use compiler::Lexer;
 use std::io;
@@ -7,6 +8,7 @@ use std::io::Write;
 pub enum Stage {
     AST,
     Tokens,
+    Assembly,
 }
 
 pub fn driver_loop(stage: Stage) {
@@ -43,7 +45,7 @@ pub fn driver_loop(stage: Stage) {
                 Ok((parsed_ast, rest)) => {
                     ast.extend(parsed_ast.into_iter());
                     if rest.is_empty() {
-                        // parsed a full expression
+                        // parsed a full expression 
                         break;
                     } else {
                         prev = rest;
@@ -65,5 +67,7 @@ pub fn driver_loop(stage: Stage) {
             println!("{:#?}", ast);
             continue;
         }
+
+        ASMBuilder::gen_asm(ast);
     }
 }

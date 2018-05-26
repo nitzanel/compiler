@@ -15,8 +15,8 @@ Usage:
 
 Options:
     -l, --lexer  Run only lexer and show its output.
-    -p, --parser  Run only parser and show its output.
-    -a, --assembly  Run only ASM builder and show its output.
+    -p, --parser  Run till parser and show its output.
+    -a, --assembly  Run till ASM builder and show its output.
 ";
 
 #[derive(Debug, Deserialize)]
@@ -33,8 +33,10 @@ fn main() {
 
     let stage = if args.flag_lexer {
         driver::Stage::Tokens
-    } else {
+    } else if args.flag_parser {
         driver::Stage::AST
+    } else {
+        driver::Stage::Assembly
     };
 
     compiler::driver::driver_loop(stage);

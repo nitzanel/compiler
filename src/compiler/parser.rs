@@ -195,6 +195,8 @@ fn parse_prototype(
     PartParsingResult::Good(Prototype { name, args }, parsed_tokens)
 }
 
+// Top level expression is always a function (no name, no arguments)
+// Basicly like a lambda
 fn parse_expression(
     tokens: &mut Vec<Token>,
     settings: &mut ParserSettings,
