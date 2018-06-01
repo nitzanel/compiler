@@ -68,6 +68,7 @@ pub fn driver_loop(stage: Stage) {
             continue;
         }
 
-        ASMBuilder::gen_asm(ast);
+        let result =  ASMBuilder::default().gen_asm(ast);
+        println!("{:#?}", result);
     }
 }

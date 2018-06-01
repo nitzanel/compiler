@@ -33,7 +33,7 @@ fn main() {
 
     let stage = if args.flag_lexer {
         driver::Stage::Tokens
-    } else if args.flag_parser {
+    } else if  args.flag_parser {
         driver::Stage::AST
     } else {
         driver::Stage::Assembly
